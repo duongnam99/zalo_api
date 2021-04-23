@@ -1,0 +1,26 @@
+{
+  "name": "cafe_do_an_thiet_ke_cnpm",
+  "version": "1.0.0",
+  "description": "restful-api-cafe_do_an_thiet_ke_cnpm",
+  "main": "index.js",
+  "repository": "https://github.com/tonytran99/do_an_thiet_ke_cnpm_20202.git",
+  "author": "tonytran99",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "googleapis": "39",
+    "joi": "^17.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
+    "mongoose": "^5.12.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
