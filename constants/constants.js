@@ -16,6 +16,10 @@ const ROLE_INVENTORY = 'inventory';
 const STATUS_PAID = 'paid';
 const STATUS_UNPAID = 'unpaid';
 
+const DOCUMENT_TYPE_VIDEO = 'video';
+const DOCUMENT_TYPE_IMAGE = 'image';
+const DOCUMENT_TYPE_OTHER = 'other';
+
 const JWT_SECRET = process.env.JWT_SECRET;
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT;
@@ -31,6 +35,9 @@ module.exports = {
     MONGO_URI,
     PORT,
     STATUS_PAID,
-    STATUS_UNPAID
+    STATUS_UNPAID,
+    DOCUMENT_TYPE_VIDEO,
+    DOCUMENT_TYPE_IMAGE,
+    DOCUMENT_TYPE_OTHER
 }
 
