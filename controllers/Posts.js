@@ -10,7 +10,7 @@ const {ROLE_CUSTOMER} = require("../constants/constants");
 const uploadFile = require('../functions/uploadFile');
 
 const postsController = {};
-postsController.createPost = async (req, res, next) => {
+postsController.create = async (req, res, next) => {
     if (req.headers && req.headers.authorization) {
         let authorization = req.headers.authorization.split(' ')[1], decoded;
         try {
@@ -38,24 +38,24 @@ postsController.createPost = async (req, res, next) => {
                 videos,
             } = req.body;
             let dataImages = [];
-            // if (Array.isArray(images)) {
-            //     for (const image of images) {
-            //         if (uploadFile.matchesFileBase64(image) !== false) {
-            //             const imageResult = uploadFile.uploadFile(image);
-            //             if (imageResult !== false) {
-            //                 let imageDocument = new DocumentModel({
-            //                     fileName: imageResult.fileName,
-            //                     fileSize: imageResult.fileSize,
-            //                     type: imageResult.type
-            //                 });
-            //                 let savedImageDocument = await imageDocument.save();
-            //                 if (savedImageDocument !== null) {
-            //                     dataImages.push(savedImageDocument._id);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
+            if (Array.isArray(images)) {
+                for (const image of images) {
+                    if (uploadFile.matchesFileBase64(image) !== false) {
+                        const imageResult = uploadFile.uploadFile(image);
+                        if (imageResult !== false) {
+                            let imageDocument = new DocumentModel({
+                                fileName: imageResult.fileName,
+                                fileSize: imageResult.fileSize,
+                                type: imageResult.type
+                            });
+                            let savedImageDocument = await imageDocument.save();
+                            if (savedImageDocument !== null) {
+                                dataImages.push(savedImageDocument._id);
+                            }
+                        }
+                    }
+                }
+            }
 
             let dataVideos = [];
             if (Array.isArray(videos)) {
@@ -77,20 +77,14 @@ postsController.createPost = async (req, res, next) => {
                 }
             }
 
-            console.log(dataImages);
-            console.log(dataVideos);
-
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: 'sss'});
-
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: 'sss'});
-
             const post = new PostModel({
                 author: userId,
                 described: described,
                 images: dataImages,
                 videos: dataVideos
             });
-            let postSaved = await post.save();
+            let postSaved = (await post.save()).populate('images').populate('videos');
+            postSaved = await PostModel.findById(postSaved._id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber']);
             return res.status(httpStatus.OK).json({
                 data: postSaved
             });
@@ -105,4 +99,30 @@ postsController.createPost = async (req, res, next) => {
         message: 'UNAUTHORIZED'
     });
 }
+postsController.show = async (req, res, next) => {
+    let post;
+    try {
+        post = await PostModel.findById(req.params.id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber']);
+        if (post == null) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
+        }
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
+    }
+    return res.status(httpStatus.OK).json({
+        data: post
+    });
+}
+postsController.list = async (req, res, next) => {
+    try {
+        let posts = await PostModel.find().populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber']);
+        return res.status(httpStatus.OK).json({
+            data: posts
+        });
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
+    }
+
+}
+
 module.exports = postsController;

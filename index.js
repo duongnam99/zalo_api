@@ -32,6 +32,8 @@ app.use("/", mainRouter);
 app.get('/settings', function (req, res) {
     res.send('Settings Page');
 });
+
+
 app.listen(PORT, () => {
     console.log("server start - " + PORT);
 })

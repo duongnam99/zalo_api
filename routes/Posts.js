@@ -6,7 +6,19 @@ const ValidationMiddleware = require("../middlewares/validate");
 postsRoutes.post(
     "/create",
     ValidationMiddleware.validJWTNeeded,
-    asyncWrapper(postsController.createPost)
+    asyncWrapper(postsController.create)
+);
+
+postsRoutes.get(
+    "/show/:id",
+    ValidationMiddleware.validJWTNeeded,
+    asyncWrapper(postsController.show),
+);
+
+postsRoutes.get(
+    "/list",
+    ValidationMiddleware.validJWTNeeded,
+    asyncWrapper(postsController.list),
 );
 
 module.exports = postsRoutes;

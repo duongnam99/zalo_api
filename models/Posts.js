@@ -11,18 +11,14 @@ const postsSchema = new mongoose.Schema({
     },
     images: [
         {
-            document: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Documents"
-            }
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Documents"
         }
     ],
     videos: [
         {
-            document: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Documents"
-            }
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Documents"
         }
     ]
 });
