@@ -10,18 +10,18 @@ const {
 const uploadFile = {};
 
 uploadFile.matchesFileBase64 = (fileBase64) => {
-    const matches = fileBase64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/), response = {};
-    if (matches.length !== 3) {
+    const matches = fileBase64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+    if (!Array.isArray(matches) || matches.length !== 3) {
         return false;
     }
-    return matches;
+    return true;
 }
 
 uploadFile.uploadFile = (fileBase64) => {
     const matches = fileBase64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/), response = {};
 
-    if (matches.length !== 3) {
-        return new Error('Invalid input string');
+    if (!Array.isArray(matches) || matches.length !== 3) {
+        return false;
     }
 
     response.type = matches[1];

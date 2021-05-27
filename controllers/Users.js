@@ -10,14 +10,13 @@ const usersController = {};
 usersController.register = async (req, res, next) => {
     try {
         const {
-            username,
+            phonenumber,
             password,
-            firstName,
-            lastName
+            username,
         } = req.body;
 
         let user = await UserModel.findOne({
-            username: username
+            phonenumber: phonenumber
         })
 
         if (user) {
@@ -29,10 +28,9 @@ usersController.register = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         user = new UserModel({
-            username: username,
+            phonenumber: phonenumber,
             password: hashedPassword,
-            firstName: firstName,
-            lastName: lastName
+            username: username
         })
 
         try {
@@ -47,9 +45,8 @@ usersController.register = async (req, res, next) => {
             res.status(httpStatus.CREATED).json({
                 data: {
                     id: savedUser._id,
+                    phonenumber: savedUser.phonenumber,
                     username: savedUser.username,
-                    firstName: savedUser.firstName,
-                    lastName: savedUser.lastName,
                 },
                 token: token
             })
@@ -67,11 +64,11 @@ usersController.register = async (req, res, next) => {
 usersController.login = async (req, res, next) => {
     try {
         const {
-            username,
+            phonenumber,
             password
         } = req.body;
         const user = await UserModel.findOne({
-            username: username
+            phonenumber: phonenumber
         })
         if (!user) {
             return res.status(httpStatus.BAD_REQUEST).json({
@@ -98,9 +95,8 @@ usersController.login = async (req, res, next) => {
         res.status(httpStatus.OK).json({
             data: {
                 id: user._id,
+                phonenumber: user.phonenumber,
                 username: user.username,
-                firstName: user.firstName,
-                lastName: user.lastName
             },
             token: token
         })
@@ -133,8 +129,7 @@ usersController.edit = async (req, res, next) => {
         }
         try {
             const {
-                firstName,
-                lastName,
+                username,
                 description,
                 address,
                 city,
@@ -173,8 +168,7 @@ usersController.edit = async (req, res, next) => {
             }
 
             user = await UserModel.findOneAndUpdate({_id: userId}, {
-                firstName: firstName,
-                lastName: lastName,
+                username: username,
                 description: description,
                 address: address,
                 city: city,

@@ -38,25 +38,24 @@ postsController.createPost = async (req, res, next) => {
                 videos,
             } = req.body;
             let dataImages = [];
-            if (Array.isArray(images)) {
-                for (const image of images) {
-                    if (uploadFile.matchesFileBase64(image) !== false) {
-                        const imageResult = uploadFile.uploadFile(image);
-                        if (imageResult !== false) {
-                            let imageDocument = new DocumentModel({
-                                fileName: imageResult.fileName,
-                                fileSize: imageResult.fileSize,
-                                type: imageResult.type
-                            });
-                            let savedImageDocument = await imageDocument.save();
-                            if (savedImageDocument !== null) {
-                                dataImages.push(savedImageDocument._id);
-                            }
-                        }
-                    }
-                }
-            }
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: 'sss'});
+            // if (Array.isArray(images)) {
+            //     for (const image of images) {
+            //         if (uploadFile.matchesFileBase64(image) !== false) {
+            //             const imageResult = uploadFile.uploadFile(image);
+            //             if (imageResult !== false) {
+            //                 let imageDocument = new DocumentModel({
+            //                     fileName: imageResult.fileName,
+            //                     fileSize: imageResult.fileSize,
+            //                     type: imageResult.type
+            //                 });
+            //                 let savedImageDocument = await imageDocument.save();
+            //                 if (savedImageDocument !== null) {
+            //                     dataImages.push(savedImageDocument._id);
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
 
             let dataVideos = [];
             if (Array.isArray(videos)) {
@@ -77,9 +76,11 @@ postsController.createPost = async (req, res, next) => {
                     }
                 }
             }
+
             console.log(dataImages);
             console.log(dataVideos);
 
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: 'sss'});
 
             return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: 'sss'});
 
