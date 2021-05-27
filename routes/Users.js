@@ -12,10 +12,17 @@ usersRoutes.post(
     asyncWrapper(usersController.login)
 );
 usersRoutes.post(
-    "/create-user",
+    "/edit",
     ValidationMiddleware.validJWTNeeded,
-    ValidationMiddleware.validJWTAdmin,
-    asyncWrapper(usersController.createUser),
+    // ValidationMiddleware.validJWTAdmin,
+    asyncWrapper(usersController.edit),
+);
+
+usersRoutes.get(
+    "/show",
+    ValidationMiddleware.validJWTNeeded,
+    // ValidationMiddleware.validJWTAdmin,
+    asyncWrapper(usersController.show),
 );
 
 

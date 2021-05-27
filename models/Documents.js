@@ -2,7 +2,7 @@ const {
     DOCUMENT_TYPE_VIDEO,
     DOCUMENT_TYPE_IMAGE,
     DOCUMENT_TYPE_OTHER
-} = require('constants/constants');
+} = require('../constants/constants');
 const mongoose = require("mongoose");
 
 const documentsSchema = new mongoose.Schema({
@@ -12,12 +12,12 @@ const documentsSchema = new mongoose.Schema({
     },
     originalFileName: {
         type: String,
-        required: true,
-        max: 30,
+        required: false,
     },
     fileSize: {
         type: Number,
-        required: true,
+        required: false,
+        // byte
     },
     fileType: {
         type: String,
@@ -27,10 +27,10 @@ const documentsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    thumbnail: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Documents'
-    },
+    // thumbnail: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Documents'
+    // },
     type: {
         type: String,
         enum: [
@@ -38,7 +38,7 @@ const documentsSchema = new mongoose.Schema({
             DOCUMENT_TYPE_IMAGE,
             DOCUMENT_TYPE_OTHER
         ],
-        required: true,
+        required: false,
         default: DOCUMENT_TYPE_OTHER
     }
 });

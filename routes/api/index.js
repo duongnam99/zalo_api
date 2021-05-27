@@ -1,13 +1,20 @@
 const express = require("express");
-const userRoutes = require("../Users");
-const typeRoutes = require("../Type");
+const usersRoutes = require("../Users");
+const friendsRoutes = require("../Friends");
+const postCommentRoutes = require("../PostComment");
+const postLikeRoutes = require("../PostLike");
+const postReportRoutes = require("../PostReport");
+const postsRoutes = require("../Posts");
+const uploadsRoutes = require("../Uploads");
 
 const apiRoutes = express.Router();
-//
-// apiRoutes.get("/", function(req, res, next) {
-//   res.json({ message: "from index api" });
-// });
 
-apiRoutes.use("/auth", userRoutes);
-apiRoutes("/type", typeRoutes);
+apiRoutes.use("/users", usersRoutes);
+apiRoutes.use("/friends", friendsRoutes);
+apiRoutes.use("/postComment", postCommentRoutes);
+apiRoutes.use("/postLike", postLikeRoutes);
+apiRoutes.use("/postReport", postReportRoutes);
+apiRoutes.use("/posts", postsRoutes);
+apiRoutes.use("/uploads", uploadsRoutes);
+
 module.exports = apiRoutes;
