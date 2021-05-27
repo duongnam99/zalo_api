@@ -7,6 +7,7 @@ const {JWT_SECRET} = require("../constants/constants");
 const {ROLE_CUSTOMER} = require("../constants/constants");
 const uploadFile = require('../functions/uploadFile');
 const usersController = {};
+
 usersController.register = async (req, res, next) => {
     try {
         const {
@@ -239,5 +240,81 @@ usersController.show = async (req, res, next) => {
         message: 'UNAUTHORIZED'
     });
 }
+
+usersController.setBlock = async (req, res, next) => {
+    try {
+        let targetId = req.body.user_id;
+        let type = req.body.type;
+        let user = await UserModel.findById(req.userId);
+        blocked = []
+        if (user.hasOwnProperty('blocked')) {
+            blocked = user.blocked_inbox
+        }
+    
+        if(type) {
+     
+            if(blocked.indexOf(targetId) === -1) {
+                blocked.push(targetId);
+            }
+        } else {
+            const index = blocked.indexOf(targetId);
+            if (index > -1) {
+                blocked.splice(index, 1);
+            }
+        }
+
+        user.blocked_inbox = blocked;
+        user.save();
+
+        res.status(200).json({
+            code: 200,
+            message: "Thao tác thành công",
+            data: user
+        });
+
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
+    }
+}
+usersController.setBlockDiary = async (req, res, next) => {
+    try {
+        let targetId = req.body.user_id;
+        let type = req.body.type;
+        let user = await UserModel.findById(req.userId);
+        blocked = []
+        if (user.hasOwnProperty('blocked')) {
+            blocked = user.blocked_diary
+        }
+    
+        if(type) {
+     
+            if(blocked.indexOf(targetId) === -1) {
+                blocked.push(targetId);
+            }
+        } else {
+            const index = blocked.indexOf(targetId);
+            if (index > -1) {
+                blocked.splice(index, 1);
+            }
+        }
+
+        user.blocked_diary = blocked;
+        user.save();
+
+        res.status(200).json({
+            code: 200,
+            message: "Thao tác thành công",
+            data: user
+        });
+
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
+    }
+}
+
 
 module.exports = usersController;

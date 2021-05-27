@@ -56,6 +56,14 @@ const usersSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Documents',
     },
+    blocked_inbox: {
+        type: Array,
+        required: false
+    },
+    blocked_diary: {
+        type: Array,
+        required: false
+    },
 });
 usersSchema.set('timestamps', true);
 module.exports = mongoose.model('Users', usersSchema);
