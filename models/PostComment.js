@@ -12,6 +12,10 @@ const postCommentSchema = new mongoose.Schema({
     content: {
         type: String,
         required: false
+    },
+    commentAnswered: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PostComment"
     }
 });
 postCommentSchema.set('timestamps', true);
