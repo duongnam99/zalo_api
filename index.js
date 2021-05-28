@@ -6,6 +6,8 @@ const mainRouter = require("./routes/index");
 const {PORT} = require("./constants/constants");
 const {MONGO_URI} = require("./constants/constants");
 const bodyParser = require('body-parser');
+const io = require('socket.io')(3000)
+// const MessageModel = require("../models/Messages");
 
 // connect to mongodb
 mongoose.connect(MONGO_URI, {
@@ -37,3 +39,21 @@ app.get('/settings', function (req, res) {
 app.listen(PORT, () => {
     console.log("server start - " + PORT);
 })
+
+// Socket.io chat realtime
+io.on('connection', (socket) => {
+    MessageModel.find().then(result => {
+        socket.emit('output-messages', result)
+    })
+    console.log('a user connected');
+    socket.emit('message', 'Hello world');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+    socket.on('chatmessage', msg => {
+        // const message = new MessageModel({ msg });
+        message.save().then(() => {
+            io.emit('message', msg)
+        })
+    })
+});

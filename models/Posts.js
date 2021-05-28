@@ -20,6 +20,12 @@ const postsSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Documents"
         }
+    ],
+    like: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Users"
+        }
     ]
 });
 postsSchema.set('timestamps', true);

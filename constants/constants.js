@@ -20,6 +20,9 @@ const DOCUMENT_TYPE_VIDEO = 'video';
 const DOCUMENT_TYPE_IMAGE = 'image';
 const DOCUMENT_TYPE_OTHER = 'other';
 
+const PRIVATE_CHAT = 'PRIVATE_CHAT';
+const GROUP_CHAT = 'GROUP_CHAT';
+
 const JWT_SECRET = process.env.JWT_SECRET;
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT;
