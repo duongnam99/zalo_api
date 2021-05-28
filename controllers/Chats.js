@@ -1,6 +1,12 @@
+const {
+    PRIVATE_CHAT,
+    GROUP_CHAT,
+} = require('../constants/constants');
+
 const jwt = require("jsonwebtoken");
 const UserModel = require("../models/Users");
-const PostModel = require("../models/Posts");
+const ChatModel = require("../models/Chats");
+const MessagesModel = require("../models/Messages");
 const PostCommentModel = require("../models/PostComment");
 const httpStatus = require("../utils/httpStatus");
 const bcrypt = require("bcrypt");
@@ -21,7 +27,7 @@ chatController.send = async (req, res, next) => {
         const userId = decoded.id;
         let user;
         try {
-            user = await (await UserModel.findById(userId));
+            user = await UserModel.findById(userId);
             if (user == null) {
                 return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
             }
@@ -32,25 +38,70 @@ chatController.send = async (req, res, next) => {
             const {
                 name,
                 chatId,
+                receivedId,
                 member,
                 type,
                 content
             } = req.body;
-            console.log(chatId);
-            return res.status(httpStatus.UNAUTHORIZED).json({
-                message: 'UNAUTHORIZED'
-            });
-            // const postComment = new PostCommentModel({
-            //     user: userId,
-            //     post: post._id,
-            //     content: content,
-            //     commentAnswered: commentAnswered ? commentAnswered : null
-            // });
-            // let postCommentSaved = await postComment.save();
-            // postCommentSaved = await PostCommentModel.findById(postCommentSaved._id).populate('post', ['described']).populate('user', ['username', 'phonenumber']).populate('commentAnswered');
-            // return res.status(httpStatus.OK).json({
-            //     data: postCommentSaved
-            // });
+            let chatIdSend = null;
+            let chat;
+            if (type === PRIVATE_CHAT) {
+                if (chatId) {
+                    chat = await ChatModel.findById(chatId);
+                    if (chat !== null) {
+                        chatIdSend = chat._id;
+                    }
+                } else {
+                    chat = new ChatModel({
+                       type: PRIVATE_CHAT,
+                       member: [
+                           receivedId,
+                           userId
+                       ]
+                    });
+                    await chat.save();
+                    chatIdSend = chat._id;
+                }
+            } else if (type === GROUP_CHAT) {
+                if (chatId) {
+                    chat = await ChatModel.findById(chatId);
+                    if (chat !== null) {
+                        chatIdSend = chat._id;
+                    }
+                } else {
+                    chat = new ChatModel({
+                        type: GROUP_CHAT,
+                        member: member
+                    });
+                    await chat.save();
+                    chatIdSend = chat._id;
+                }
+            }
+            if (chatIdSend) {
+                if (content) {
+                    let message = new MessagesModel({
+                        chat: chatIdSend,
+                        user: userId,
+                        content: content
+                    });
+                    await message.save();
+                    console.log(message._id);
+                    let messageNew = await MessagesModel.findById(message._id).populate('chat').populate('user');
+                    return res.status(httpStatus.OK).json({
+                        data: messageNew
+                    });
+                } else {
+                    return res.status(httpStatus.OK).json({
+                        data: chat,
+                        message: 'Create chat success',
+                        response: 'CREATE_CHAT_SUCCESS'
+                    });
+                }
+            } else {
+                return res.status(httpStatus.BAD_REQUEST).json({
+                    message: 'Not chat'
+                });
+            }
         } catch (e) {
             return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
                 message: e.message
