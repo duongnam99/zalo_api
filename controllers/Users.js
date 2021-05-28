@@ -120,7 +120,7 @@ usersController.edit = async (req, res, next) => {
         const userId = decoded.id;
         let user;
         try {
-            user = await (await UserModel.findById(userId));
+            user = await UserModel.findById(userId);
             if (user == null) {
                 return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
             }
@@ -183,6 +183,7 @@ usersController.edit = async (req, res, next) => {
             if (!user) {
                 return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
             }
+            user = await UserModel.findById(userId).populate('avatar').populate('cover_image');
             return res.status(httpStatus.OK).json({
                 data: user
             });

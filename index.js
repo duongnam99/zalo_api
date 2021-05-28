@@ -7,7 +7,7 @@ const {PORT} = require("./constants/constants");
 const {MONGO_URI} = require("./constants/constants");
 const bodyParser = require('body-parser');
 const io = require('socket.io')(3000)
-const MessageModel = require("../models/Messages");
+// const MessageModel = require("../models/Messages");
 
 // connect to mongodb
 mongoose.connect(MONGO_URI, {
@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
         console.log('user disconnected');
     });
     socket.on('chatmessage', msg => {
-        const message = new MessageModel({ msg });
+        // const message = new MessageModel({ msg });
         message.save().then(() => {
             io.emit('message', msg)
         })
