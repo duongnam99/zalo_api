@@ -65,5 +65,7 @@ const usersSchema = new mongoose.Schema({
         required: false
     },
 });
+
+usersSchema.index({phonenumber: 'text'});
 usersSchema.set('timestamps', true);
 module.exports = mongoose.model('Users', usersSchema);

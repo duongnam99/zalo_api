@@ -29,5 +29,6 @@ usersRoutes.get(
 
 usersRoutes.post("/set-block-user", auth, usersController.setBlock);
 usersRoutes.post("/set-block-diary", auth, usersController.setBlockDiary);
+usersRoutes.post("/search", auth, usersController.searchUser);
 
 module.exports = usersRoutes;

@@ -77,5 +77,29 @@ friendsController.setAccept = async (req, res, next) => {
     }
 }
 
+friendsController.listFriends = async (req, res, next) => {
+    try {
+        if (req.body.user_id == null) {
+            let requested = await FriendModel.find({sender: req.userId, status: "1" }).distinct('receiver')
+            let accepted = await FriendModel.find({receiver: req.userId, status: "1" }).distinct('sender')
+
+            let users = await UserModel.find().where('_id').in(requested.concat(accepted)).exec()
+
+            res.status(200).json({
+                code: 200,
+                message: "Danh sách bạn bè",
+                data: {
+                    friends: users,
+                }
+            });
+        }
+
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
+    }
+}
+
 
 module.exports = friendsController;

@@ -316,5 +316,22 @@ usersController.setBlockDiary = async (req, res, next) => {
     }
 }
 
+usersController.searchUser = async (req, res, next) => {
+    try {
+        let searchKey = new RegExp(req.body.keyword, 'i')
+        let result = await UserModel.find({phonenumber: searchKey}).limit(10).exec();
+
+        res.status(200).json({
+            code: 200,
+            message: "Tìm kiếm thành công",
+            data: result
+        });
+
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
+    }
+}
 
 module.exports = usersController;
