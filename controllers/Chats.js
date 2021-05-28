@@ -113,5 +113,19 @@ chatController.send = async (req, res, next) => {
         message: 'UNAUTHORIZED'
     });
 }
+chatController.getMessages = async (req, res, next) => {
+    try {
+        let messages = await MessagesModel.find({
+            chat: req.params.chatId
+        }).populate('user');
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            data: messages
+        });
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
+    }
+}
 
 module.exports = chatController;

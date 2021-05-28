@@ -10,4 +10,11 @@ chatsRoutes.post(
     asyncWrapper(chatController.send),
 );
 
+chatsRoutes.get(
+    "/getMessages/:chatId",
+    ValidationMiddleware.validJWTNeeded,
+    asyncWrapper(chatController.getMessages),
+);
+
+
 module.exports = chatsRoutes;
