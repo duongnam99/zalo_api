@@ -3,6 +3,8 @@ const {asyncWrapper} = require("../utils/asyncWrapper");
 const express = require("express");
 const usersRoutes = express.Router();
 const ValidationMiddleware = require("../middlewares/validate");
+const auth = require("../middlewares/auth");
+
 usersRoutes.post(
     "/register",
     asyncWrapper(usersController.register)
@@ -25,5 +27,7 @@ usersRoutes.get(
     asyncWrapper(usersController.show),
 );
 
+usersRoutes.post("/set-block-user", auth, usersController.setBlock);
+usersRoutes.post("/set-block-diary", auth, usersController.setBlockDiary);
 
 module.exports = usersRoutes;

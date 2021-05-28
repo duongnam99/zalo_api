@@ -19,4 +19,8 @@ apiRoutes.use("/posts", postsRoutes);
 apiRoutes.use("/uploads", uploadsRoutes);
 apiRoutes.use("/chats", chatsRoutes)
 
+
+apiRoutes.get(
+    "/", (req, res) => res.json({ api: "is-working" })
+);
 module.exports = apiRoutes;

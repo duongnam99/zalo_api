@@ -11,11 +11,7 @@ const friendsSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: [
-
-        ],
         required: true,
-        // default: ''
     }
 });
 friendsSchema.set('timestamps', true);
