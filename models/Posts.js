@@ -26,7 +26,12 @@ const postsSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Users"
         }
-    ]
+    ],
+    countComments: {
+        type: Number,
+        required: false,
+        default: 0
+    },
 });
 postsSchema.set('timestamps', true);
 module.exports = mongoose.model('Posts', postsSchema);

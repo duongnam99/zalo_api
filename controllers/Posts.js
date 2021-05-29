@@ -81,10 +81,11 @@ postsController.create = async (req, res, next) => {
                 author: userId,
                 described: described,
                 images: dataImages,
-                videos: dataVideos
+                videos: dataVideos,
+                countComments: 0
             });
             let postSaved = (await post.save()).populate('images').populate('videos');
-            postSaved = await PostModel.findById(postSaved._id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber']);
+            postSaved = await PostModel.findById(postSaved._id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
             return res.status(httpStatus.OK).json({
                 data: postSaved
             });
@@ -102,7 +103,7 @@ postsController.create = async (req, res, next) => {
 postsController.show = async (req, res, next) => {
     let post;
     try {
-        post = await PostModel.findById(req.params.id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber']);
+        post = await PostModel.findById(req.params.id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
         if (post == null) {
             return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
         }
@@ -115,7 +116,7 @@ postsController.show = async (req, res, next) => {
 }
 postsController.list = async (req, res, next) => {
     try {
-        let posts = await PostModel.find().populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber']);
+        let posts = await PostModel.find().populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
         return res.status(httpStatus.OK).json({
             data: posts
         });
