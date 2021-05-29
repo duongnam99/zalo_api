@@ -81,7 +81,8 @@ postsController.create = async (req, res, next) => {
                 author: userId,
                 described: described,
                 images: dataImages,
-                videos: dataVideos
+                videos: dataVideos,
+                countComments: 0
             });
             let postSaved = (await post.save()).populate('images').populate('videos');
             postSaved = await PostModel.findById(postSaved._id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
