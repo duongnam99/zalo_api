@@ -14,6 +14,8 @@ usersController.register = async (req, res, next) => {
             phonenumber,
             password,
             username,
+            avatar,
+            cover_image,
         } = req.body;
 
         let user = await UserModel.findOne({
@@ -28,10 +30,41 @@ usersController.register = async (req, res, next) => {
         //Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        let savedAvatarDocument = null;
+        let savedCoverImageDocument = null;
+        if (uploadFile.matchesFileBase64(avatar) !== false) {
+            const avatarResult = uploadFile.uploadFile(avatar);
+            if (avatarResult !== false) {
+                let avatarDocument = new DocumentModel({
+                    fileName: avatarResult.fileName,
+                    fileSize: avatarResult.fileSize,
+                    type: avatarResult.type
+                });
+                savedAvatarDocument = await avatarDocument.save();
+            }
+        } else {
+            savedAvatarDocument = await DocumentModel.findById(avatar);
+        }
+        if (uploadFile.matchesFileBase64(cover_image) !== false) {
+            const coverImageResult = uploadFile.uploadFile(cover_image);
+            if (coverImageResult !== false) {
+                console.log(coverImageResult);
+                let coverImageDocument = new DocumentModel({
+                    fileName: coverImageResult.fileName,
+                    fileSize: coverImageResult.fileSize,
+                    type: coverImageResult.type
+                });
+                savedCoverImageDocument = await coverImageDocument.save();
+            }
+        } else {
+            savedCoverImageDocument = await DocumentModel.findById(cover_image);
+        }
         user = new UserModel({
             phonenumber: phonenumber,
             password: hashedPassword,
-            username: username
+            username: username,
+            avatar: savedAvatarDocument !== null ? savedAvatarDocument._id : null,
+            cover_image: savedCoverImageDocument !== null ? savedCoverImageDocument._id : null,
         })
 
         try {
@@ -222,18 +255,7 @@ usersController.show = async (req, res, next) => {
             return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
         }
         return res.status(httpStatus.OK).json({
-            data: {
-                id: user._id,
-                username: user.username,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                description: user.description,
-                address: user.address,
-                city: user.city,
-                country: user.country,
-                avatar: user.avatar,
-                cover_image: user.cover_image,
-            }
+            data: user
         });
     }
 
