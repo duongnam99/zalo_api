@@ -14,8 +14,6 @@ usersController.register = async (req, res, next) => {
             phonenumber,
             password,
             username,
-            avatar,
-            cover_image,
         } = req.body;
 
         let user = await UserModel.findOne({
@@ -24,12 +22,13 @@ usersController.register = async (req, res, next) => {
 
         if (user) {
             return res.status(httpStatus.BAD_REQUEST).json({
-                message: 'Username already exists'
+                message: 'Phone number already exists'
             });
         }
         //Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        let avatar  = await DocumentModel.findById("60b1d1185ee5aa2d361a5cf8");
         user = new UserModel({
             phonenumber: phonenumber,
             password: hashedPassword,
@@ -51,7 +50,7 @@ usersController.register = async (req, res, next) => {
                     id: savedUser._id,
                     phonenumber: savedUser.phonenumber,
                     username: savedUser.username,
-                    avatar: savedUser.avatar,
+                    avatar: avatar,
                 },
                 token: token
             })
