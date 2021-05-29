@@ -14,6 +14,8 @@ usersController.register = async (req, res, next) => {
             phonenumber,
             password,
             username,
+            avatar,
+            cover_image,
         } = req.body;
 
         let user = await UserModel.findOne({
@@ -31,7 +33,7 @@ usersController.register = async (req, res, next) => {
         user = new UserModel({
             phonenumber: phonenumber,
             password: hashedPassword,
-            username: username
+            username: username,
         })
 
         try {
@@ -222,18 +224,7 @@ usersController.show = async (req, res, next) => {
             return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
         }
         return res.status(httpStatus.OK).json({
-            data: {
-                id: user._id,
-                username: user.username,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                description: user.description,
-                address: user.address,
-                city: user.city,
-                country: user.country,
-                avatar: user.avatar,
-                cover_image: user.cover_image,
-            }
+            data: user
         });
     }
 
