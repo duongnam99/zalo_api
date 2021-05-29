@@ -34,6 +34,7 @@ usersController.register = async (req, res, next) => {
             phonenumber: phonenumber,
             password: hashedPassword,
             username: username,
+            avatar: "60b1d1185ee5aa2d361a5cf8"
         })
 
         try {
@@ -50,6 +51,7 @@ usersController.register = async (req, res, next) => {
                     id: savedUser._id,
                     phonenumber: savedUser.phonenumber,
                     username: savedUser.username,
+                    avatar: savedUser.avatar,
                 },
                 token: token
             })
