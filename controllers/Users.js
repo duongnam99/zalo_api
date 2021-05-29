@@ -30,41 +30,10 @@ usersController.register = async (req, res, next) => {
         //Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        let savedAvatarDocument = null;
-        let savedCoverImageDocument = null;
-        if (uploadFile.matchesFileBase64(avatar) !== false) {
-            const avatarResult = uploadFile.uploadFile(avatar);
-            if (avatarResult !== false) {
-                let avatarDocument = new DocumentModel({
-                    fileName: avatarResult.fileName,
-                    fileSize: avatarResult.fileSize,
-                    type: avatarResult.type
-                });
-                savedAvatarDocument = await avatarDocument.save();
-            }
-        } else {
-            savedAvatarDocument = await DocumentModel.findById(avatar);
-        }
-        if (uploadFile.matchesFileBase64(cover_image) !== false) {
-            const coverImageResult = uploadFile.uploadFile(cover_image);
-            if (coverImageResult !== false) {
-                console.log(coverImageResult);
-                let coverImageDocument = new DocumentModel({
-                    fileName: coverImageResult.fileName,
-                    fileSize: coverImageResult.fileSize,
-                    type: coverImageResult.type
-                });
-                savedCoverImageDocument = await coverImageDocument.save();
-            }
-        } else {
-            savedCoverImageDocument = await DocumentModel.findById(cover_image);
-        }
         user = new UserModel({
             phonenumber: phonenumber,
             password: hashedPassword,
             username: username,
-            avatar: savedAvatarDocument !== null ? savedAvatarDocument._id : null,
-            cover_image: savedCoverImageDocument !== null ? savedCoverImageDocument._id : null,
         })
 
         try {
