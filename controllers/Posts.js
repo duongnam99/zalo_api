@@ -85,7 +85,16 @@ postsController.create = async (req, res, next) => {
                 countComments: 0
             });
             let postSaved = (await post.save()).populate('images').populate('videos');
-            postSaved = await PostModel.findById(postSaved._id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
+            postSaved = await PostModel.findById(postSaved._id).populate('images', ['fileName']).populate('videos', ['fileName']).populate({
+                path: 'author',
+                select: '_id username phonenumber avatar',
+                model: 'Users',
+                populate: {
+                    path: 'avatar',
+                    select: '_id fileName',
+                    model: 'Documents',
+                },
+            });
             return res.status(httpStatus.OK).json({
                 data: postSaved
             });
@@ -103,7 +112,16 @@ postsController.create = async (req, res, next) => {
 postsController.show = async (req, res, next) => {
     let post;
     try {
-        post = await PostModel.findById(req.params.id).populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
+        post = await PostModel.findById(req.params.id).populate('images', ['fileName']).populate('videos', ['fileName']).populate({
+            path: 'author',
+            select: '_id username phonenumber avatar',
+            model: 'Users',
+            populate: {
+                path: 'avatar',
+                select: '_id fileName',
+                model: 'Documents',
+            },
+        });
         if (post == null) {
             return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
         }
@@ -116,7 +134,16 @@ postsController.show = async (req, res, next) => {
 }
 postsController.list = async (req, res, next) => {
     try {
-        let posts = await PostModel.find().populate('images', ['fileName']).populate('videos').populate('author', ['username', 'phonenumber', 'avatar', 'cover_image']);
+        let posts = await PostModel.find().populate('images', ['fileName']).populate('videos', ['fileName']).populate({
+            path: 'author',
+            select: '_id username phonenumber avatar',
+            model: 'Users',
+            populate: {
+                path: 'avatar',
+                select: '_id fileName',
+                model: 'Documents',
+            },
+        });
         return res.status(httpStatus.OK).json({
             data: posts
         });
