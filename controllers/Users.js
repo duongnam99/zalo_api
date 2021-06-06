@@ -3,6 +3,7 @@ const UserModel = require("../models/Users");
 const DocumentModel = require("../models/Documents");
 const httpStatus = require("../utils/httpStatus");
 const bcrypt = require("bcrypt");
+const moment = require("moment");
 const {JWT_SECRET} = require("../constants/constants");
 const {ROLE_CUSTOMER} = require("../constants/constants");
 const uploadFile = require('../functions/uploadFile');
@@ -133,53 +134,70 @@ usersController.edit = async (req, res, next) => {
         }
         try {
             const {
-                username,
-                description,
-                address,
-                city,
-                country,
                 avatar,
                 cover_image,
             } = req.body;
-            let savedAvatarDocument = null;
-            let savedCoverImageDocument = null;
-            if (uploadFile.matchesFileBase64(avatar) !== false) {
-                const avatarResult = uploadFile.uploadFile(avatar);
-                if (avatarResult !== false) {
-                    let avatarDocument = new DocumentModel({
-                        fileName: avatarResult.fileName,
-                        fileSize: avatarResult.fileSize,
-                        type: avatarResult.type
-                    });
-                    savedAvatarDocument = await avatarDocument.save();
+            console.log(req.body.birthday);
+            const dataUserUpdate = {};
+            const listPros = [
+                "username",
+                "gender",
+                "birthday",
+                "description",
+                "address",
+                "city",
+                "country",
+                "avatar",
+                "cover_image"
+            ];
+            for (let i = 0; i < listPros.length; i++) {
+                let pro = listPros[i];
+                if (req.body.hasOwnProperty(pro)) {
+                    switch (pro) {
+                        case "avatar":
+                            let savedAvatarDocument = null;
+                            if (uploadFile.matchesFileBase64(avatar) !== false) {
+                                const avatarResult = uploadFile.uploadFile(avatar);
+                                if (avatarResult !== false) {
+                                    let avatarDocument = new DocumentModel({
+                                        fileName: avatarResult.fileName,
+                                        fileSize: avatarResult.fileSize,
+                                        type: avatarResult.type
+                                    });
+                                    savedAvatarDocument = await avatarDocument.save();
+                                }
+                            } else {
+                                savedAvatarDocument = await DocumentModel.findById(avatar);
+                            }
+                            dataUserUpdate[pro] = savedAvatarDocument !== null ? savedAvatarDocument._id : null;
+                            break;
+                        case "cover_image":
+                            let savedCoverImageDocument = null;
+                            if (uploadFile.matchesFileBase64(cover_image) !== false) {
+                                const coverImageResult = uploadFile.uploadFile(cover_image);
+                                if (coverImageResult !== false) {
+                                    console.log(coverImageResult);
+                                    let coverImageDocument = new DocumentModel({
+                                        fileName: coverImageResult.fileName,
+                                        fileSize: coverImageResult.fileSize,
+                                        type: coverImageResult.type
+                                    });
+                                    savedCoverImageDocument = await coverImageDocument.save();
+                                }
+                            } else {
+                                savedCoverImageDocument = await DocumentModel.findById(cover_image);
+                            }
+                            dataUserUpdate[pro] = savedCoverImageDocument !== null ? savedCoverImageDocument._id : null;
+                            break;
+                        default:
+                            dataUserUpdate[pro] = req.body[pro];
+                            break;
+                    }
                 }
-            } else {
-                savedAvatarDocument = await DocumentModel.findById(avatar);
-            }
-            if (uploadFile.matchesFileBase64(cover_image) !== false) {
-                const coverImageResult = uploadFile.uploadFile(cover_image);
-                if (coverImageResult !== false) {
-                    console.log(coverImageResult);
-                    let coverImageDocument = new DocumentModel({
-                        fileName: coverImageResult.fileName,
-                        fileSize: coverImageResult.fileSize,
-                        type: coverImageResult.type
-                    });
-                    savedCoverImageDocument = await coverImageDocument.save();
-                }
-            } else {
-                savedCoverImageDocument = await DocumentModel.findById(cover_image);
             }
 
-            user = await UserModel.findOneAndUpdate({_id: userId}, {
-                username: username,
-                description: description,
-                address: address,
-                city: city,
-                country: country,
-                avatar: savedAvatarDocument !== null ? savedAvatarDocument._id : null,
-                cover_image: savedCoverImageDocument !== null ? savedCoverImageDocument._id : null,
-            }, {
+
+            user = await UserModel.findOneAndUpdate({_id: userId}, dataUserUpdate, {
                 new: true,
                 runValidators: true
             });
@@ -187,7 +205,7 @@ usersController.edit = async (req, res, next) => {
             if (!user) {
                 return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
             }
-            user = await UserModel.findById(userId).populate('avatar').populate('cover_image');
+            user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
             return res.status(httpStatus.OK).json({
                 data: user
             });
@@ -204,20 +222,25 @@ usersController.edit = async (req, res, next) => {
 }
 usersController.show = async (req, res, next) => {
     if (req.headers && req.headers.authorization) {
-        let authorization = req.headers.authorization.split(' ')[1], decoded;
-        try {
-            decoded = jwt.verify(authorization, process.env.JWT_SECRET);
-        } catch (e) {
-            res.status(httpStatus.UNAUTHORIZED).json({
-                success: false,
-                message: 'unauthorized'
-            });
+        console.log(req.params.id)
+        let userId = null;
+        if (!req.params.id) {
+            let authorization = req.headers.authorization.split(' ')[1], decoded;
+            try {
+                decoded = jwt.verify(authorization, process.env.JWT_SECRET);
+            } catch (e) {
+                res.status(httpStatus.UNAUTHORIZED).json({
+                    success: false,
+                    message: 'unauthorized'
+                });
+            }
+            userId = decoded.id;
+        } else {
+            userId = req.params.id;
         }
-        const userId = decoded.id;
-        console.log(userId)
         let user;
         try {
-            user = await UserModel.findById(userId).populate('avatar').populate('cover_image');
+            user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
             if (user == null) {
                 return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
             }
@@ -233,7 +256,6 @@ usersController.show = async (req, res, next) => {
         message: 'UNAUTHORIZED'
     });
 }
-
 usersController.setBlock = async (req, res, next) => {
     try {
         let targetId = req.body.user_id;
@@ -308,7 +330,6 @@ usersController.setBlockDiary = async (req, res, next) => {
         });
     }
 }
-
 usersController.searchUser = async (req, res, next) => {
     try {
         let searchKey = new RegExp(req.body.keyword, 'i')

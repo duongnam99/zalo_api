@@ -27,6 +27,14 @@ usersRoutes.get(
     asyncWrapper(usersController.show),
 );
 
+usersRoutes.get(
+    "/show/:id",
+    ValidationMiddleware.validJWTNeeded,
+    // ValidationMiddleware.validJWTAdmin,
+    asyncWrapper(usersController.show),
+);
+
+
 usersRoutes.post("/set-block-user", auth, usersController.setBlock);
 usersRoutes.post("/set-block-diary", auth, usersController.setBlockDiary);
 usersRoutes.post("/search", auth, usersController.searchUser);

@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const {GENDER_SECRET} = require("../constants/constants");
+const {GENDER_FEMALE} = require("../constants/constants");
+const {GENDER_MALE} = require("../constants/constants");
 
 const usersSchema = new mongoose.Schema({
     phonenumber: {
@@ -9,8 +12,6 @@ const usersSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        // max: 255,
-        // min: 6,
     },
     password: {
         type: String,
@@ -27,6 +28,16 @@ const usersSchema = new mongoose.Schema({
         type: String,
         required: false,
         max: 30,
+    },
+    gender: {
+        type: String,
+        enum: [GENDER_MALE, GENDER_FEMALE, GENDER_SECRET],
+        required: false,
+        default: GENDER_SECRET,
+    },
+    birthday: {
+        type: Date,
+        required: false
     },
     description: {
         type: String,
