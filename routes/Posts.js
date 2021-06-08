@@ -3,21 +3,28 @@ const {asyncWrapper} = require("../utils/asyncWrapper");
 const express = require("express");
 const postsRoutes = express.Router();
 const ValidationMiddleware = require("../middlewares/validate");
+const auth = require("../middlewares/auth");
+
 postsRoutes.post(
     "/create",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(postsController.create)
+);
+postsRoutes.post(
+    "/edit/:id",
+    auth,
+    asyncWrapper(postsController.edit)
 );
 
 postsRoutes.get(
     "/show/:id",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(postsController.show),
 );
 
 postsRoutes.get(
     "/list",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(postsController.list),
 );
 

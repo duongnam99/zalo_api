@@ -2,17 +2,17 @@ const chatController = require("../controllers/Chats");
 const {asyncWrapper} = require("../utils/asyncWrapper");
 const express = require("express");
 const chatsRoutes = express.Router();
-const ValidationMiddleware = require("../middlewares/validate");
+const auth = require("../middlewares/auth");
 
 chatsRoutes.post(
     "/send",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(chatController.send),
 );
 
 chatsRoutes.get(
     "/getMessages/:chatId",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(chatController.getMessages),
 );
 

@@ -3,9 +3,7 @@ const UserModel = require("../models/Users");
 const DocumentModel = require("../models/Documents");
 const httpStatus = require("../utils/httpStatus");
 const bcrypt = require("bcrypt");
-const moment = require("moment");
 const {JWT_SECRET} = require("../constants/constants");
-const {ROLE_CUSTOMER} = require("../constants/constants");
 const uploadFile = require('../functions/uploadFile');
 const usersController = {};
 
@@ -97,7 +95,7 @@ usersController.login = async (req, res, next) => {
             JWT_SECRET
         );
         delete user["password"];
-        res.status(httpStatus.OK).json({
+        return res.status(httpStatus.OK).json({
             data: {
                 id: user._id,
                 phonenumber: user.phonenumber,
@@ -106,155 +104,168 @@ usersController.login = async (req, res, next) => {
             token: token
         })
     } catch (e) {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
             message: e.message
         });
     }
 }
 usersController.edit = async (req, res, next) => {
-    if (req.headers && req.headers.authorization) {
-        let authorization = req.headers.authorization.split(' ')[1], decoded;
-        try {
-            decoded = jwt.verify(authorization, process.env.JWT_SECRET);
-        } catch (e) {
-            return res.status(httpStatus.UNAUTHORIZED).json({
-                success: false,
-                message: 'unauthorized'
-            });
-        }
-        const userId = decoded.id;
+    try {
+        let userId = req.userId;
         let user;
-        try {
-            user = await UserModel.findById(userId);
-            if (user == null) {
-                return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
-            }
-        } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
-        }
-        try {
-            const {
-                avatar,
-                cover_image,
-            } = req.body;
-            console.log(req.body.birthday);
-            const dataUserUpdate = {};
-            const listPros = [
-                "username",
-                "gender",
-                "birthday",
-                "description",
-                "address",
-                "city",
-                "country",
-                "avatar",
-                "cover_image"
-            ];
-            for (let i = 0; i < listPros.length; i++) {
-                let pro = listPros[i];
-                if (req.body.hasOwnProperty(pro)) {
-                    switch (pro) {
-                        case "avatar":
-                            let savedAvatarDocument = null;
-                            if (uploadFile.matchesFileBase64(avatar) !== false) {
-                                const avatarResult = uploadFile.uploadFile(avatar);
-                                if (avatarResult !== false) {
-                                    let avatarDocument = new DocumentModel({
-                                        fileName: avatarResult.fileName,
-                                        fileSize: avatarResult.fileSize,
-                                        type: avatarResult.type
-                                    });
-                                    savedAvatarDocument = await avatarDocument.save();
-                                }
-                            } else {
-                                savedAvatarDocument = await DocumentModel.findById(avatar);
+        const {
+            avatar,
+            cover_image,
+        } = req.body;
+        const dataUserUpdate = {};
+        const listPros = [
+            "username",
+            "gender",
+            "birthday",
+            "description",
+            "address",
+            "city",
+            "country",
+            "avatar",
+            "cover_image"
+        ];
+        for (let i = 0; i < listPros.length; i++) {
+            let pro = listPros[i];
+            if (req.body.hasOwnProperty(pro)) {
+                switch (pro) {
+                    case "avatar":
+                        let savedAvatarDocument = null;
+                        if (uploadFile.matchesFileBase64(avatar) !== false) {
+                            const avatarResult = uploadFile.uploadFile(avatar);
+                            if (avatarResult !== false) {
+                                let avatarDocument = new DocumentModel({
+                                    fileName: avatarResult.fileName,
+                                    fileSize: avatarResult.fileSize,
+                                    type: avatarResult.type
+                                });
+                                savedAvatarDocument = await avatarDocument.save();
                             }
-                            dataUserUpdate[pro] = savedAvatarDocument !== null ? savedAvatarDocument._id : null;
-                            break;
-                        case "cover_image":
-                            let savedCoverImageDocument = null;
-                            if (uploadFile.matchesFileBase64(cover_image) !== false) {
-                                const coverImageResult = uploadFile.uploadFile(cover_image);
-                                if (coverImageResult !== false) {
-                                    console.log(coverImageResult);
-                                    let coverImageDocument = new DocumentModel({
-                                        fileName: coverImageResult.fileName,
-                                        fileSize: coverImageResult.fileSize,
-                                        type: coverImageResult.type
-                                    });
-                                    savedCoverImageDocument = await coverImageDocument.save();
-                                }
-                            } else {
-                                savedCoverImageDocument = await DocumentModel.findById(cover_image);
+                        } else {
+                            savedAvatarDocument = await DocumentModel.findById(avatar);
+                        }
+                        dataUserUpdate[pro] = savedAvatarDocument !== null ? savedAvatarDocument._id : null;
+                        break;
+                    case "cover_image":
+                        let savedCoverImageDocument = null;
+                        if (uploadFile.matchesFileBase64(cover_image) !== false) {
+                            const coverImageResult = uploadFile.uploadFile(cover_image);
+                            if (coverImageResult !== false) {
+                                let coverImageDocument = new DocumentModel({
+                                    fileName: coverImageResult.fileName,
+                                    fileSize: coverImageResult.fileSize,
+                                    type: coverImageResult.type
+                                });
+                                savedCoverImageDocument = await coverImageDocument.save();
                             }
-                            dataUserUpdate[pro] = savedCoverImageDocument !== null ? savedCoverImageDocument._id : null;
-                            break;
-                        default:
-                            dataUserUpdate[pro] = req.body[pro];
-                            break;
-                    }
+                        } else {
+                            savedCoverImageDocument = await DocumentModel.findById(cover_image);
+                        }
+                        dataUserUpdate[pro] = savedCoverImageDocument !== null ? savedCoverImageDocument._id : null;
+                        break;
+                    default:
+                        dataUserUpdate[pro] = req.body[pro];
+                        break;
                 }
             }
-
-
-            user = await UserModel.findOneAndUpdate({_id: userId}, dataUserUpdate, {
-                new: true,
-                runValidators: true
-            });
-
-            if (!user) {
-                return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
-            }
-            user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
-            return res.status(httpStatus.OK).json({
-                data: user
-            });
-        } catch (e) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-                message: e.message
-            });
         }
-    }
 
-    return res.status(httpStatus.UNAUTHORIZED).json({
-        message: 'UNAUTHORIZED'
-    });
-}
-usersController.show = async (req, res, next) => {
-    if (req.headers && req.headers.authorization) {
-        console.log(req.params.id)
-        let userId = null;
-        if (!req.params.id) {
-            let authorization = req.headers.authorization.split(' ')[1], decoded;
-            try {
-                decoded = jwt.verify(authorization, process.env.JWT_SECRET);
-            } catch (e) {
-                res.status(httpStatus.UNAUTHORIZED).json({
-                    success: false,
-                    message: 'unauthorized'
-                });
-            }
-            userId = decoded.id;
-        } else {
-            userId = req.params.id;
+
+        user = await UserModel.findOneAndUpdate({_id: userId}, dataUserUpdate, {
+            new: true,
+            runValidators: true
+        });
+
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
         }
-        let user;
-        try {
-            user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
-            if (user == null) {
-                return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
-            }
-        } catch (error) {
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
-        }
+        user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
         return res.status(httpStatus.OK).json({
             data: user
         });
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
     }
+}
+usersController.changePassword = async (req, res, next) => {
+    try {
+        let userId = req.userId;
+        let  user = await UserModel.findById(userId);
+        if (user == null) {
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: "UNAUTHORIZED"
+            });
+        }
+        const {
+            currentPassword,
+            newPassword,
+        } = req.body;
+        // password
+        const validPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!validPassword) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                message: 'Current password incorrect',
+                code: 'CURRENT_PASSWORD_INCORRECT'
+            });
+        }
 
-    return res.status(httpStatus.UNAUTHORIZED).json({
-        message: 'UNAUTHORIZED'
-    });
+        //Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        user = await UserModel.findOneAndUpdate({_id: userId}, {
+            password: hashedNewPassword
+        }, {
+            new: true,
+            runValidators: true
+        });
+
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
+        }
+
+        // create and assign a token
+        const token = jwt.sign(
+            {username: user.username, firstName: user.firstName, lastName: user.lastName, id: user._id},
+            JWT_SECRET
+        );
+        user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
+        return res.status(httpStatus.OK).json({
+            data: user,
+            token: token
+        });
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message,
+        });
+    }
+}
+usersController.show = async (req, res, next) => {
+    try {
+        let userId = null;
+        if (req.params.id) {
+            userId = req.params.id;
+        } else {
+            userId = req.userId;
+        }
+
+        let user = await UserModel.findById(userId).select('phonenumber username gender birthday avatar cover_image blocked_inbox blocked_diary').populate('avatar').populate('cover_image');
+        if (user == null) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
+        }
+
+        return res.status(httpStatus.OK).json({
+            data: user
+        });
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
+    }
 }
 usersController.setBlock = async (req, res, next) => {
     try {

@@ -15,22 +15,23 @@ usersRoutes.post(
 );
 usersRoutes.post(
     "/edit",
-    ValidationMiddleware.validJWTNeeded,
-    // ValidationMiddleware.validJWTAdmin,
+    auth,
     asyncWrapper(usersController.edit),
 );
-
+usersRoutes.post(
+    "/change-password",
+    auth,
+    asyncWrapper(usersController.changePassword),
+);
 usersRoutes.get(
     "/show",
-    ValidationMiddleware.validJWTNeeded,
-    // ValidationMiddleware.validJWTAdmin,
+    auth,
     asyncWrapper(usersController.show),
 );
 
 usersRoutes.get(
     "/show/:id",
-    ValidationMiddleware.validJWTNeeded,
-    // ValidationMiddleware.validJWTAdmin,
+    auth,
     asyncWrapper(usersController.show),
 );
 

@@ -2,11 +2,11 @@ const postLikeController = require("../controllers/PostLike");
 const {asyncWrapper} = require("../utils/asyncWrapper");
 const express = require("express");
 const postLikeRoutes = express.Router();
-const ValidationMiddleware = require("../middlewares/validate");
+const auth = require("../middlewares/auth");
 
 postLikeRoutes.post(
     "/action/:postId",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(postLikeController.action),
 );
 

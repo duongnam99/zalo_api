@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const UserModel = require("../models/Users");
+const httpStatus = require("../utils/httpStatus");
 
 const auth = async (req, res, next) => {
   try {
@@ -17,7 +18,9 @@ const auth = async (req, res, next) => {
     try {
         user = await UserModel.findById(userId);
         if (user == null) {
-            return res.status(httpStatus.NOT_FOUND).json({message: "Can not find user"});
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: "UNAUTHORIZED"
+            });
         }
     } catch (error) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
@@ -26,7 +29,7 @@ const auth = async (req, res, next) => {
     req.userId = userId;
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
   }
 };
 

@@ -32,6 +32,11 @@ const postsSchema = new mongoose.Schema({
         required: false,
         default: 0
     },
+    isLike: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
 });
 postsSchema.set('timestamps', true);
 module.exports = mongoose.model('Posts', postsSchema);

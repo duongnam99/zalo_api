@@ -2,11 +2,11 @@ const postReportController = require("../controllers/PostReport");
 const {asyncWrapper} = require("../utils/asyncWrapper");
 const express = require("express");
 const postReportRoutes = express.Router();
-const ValidationMiddleware = require("../middlewares/validate");
+const auth = require("../middlewares/auth");
 
 postReportRoutes.post(
     "/create/:postId",
-    ValidationMiddleware.validJWTNeeded,
+    auth,
     asyncWrapper(postReportController.create),
 );
 
