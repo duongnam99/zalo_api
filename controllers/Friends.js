@@ -7,16 +7,43 @@ const {JWT_SECRET} = require("../constants/constants");
 const {ROLE_CUSTOMER} = require("../constants/constants");
 const friendsController = {};
 
+// 0: gửi lời mời
+// 1: kết bạn
+// 2: từ chối
+// 3: hủy kết bạn
+
 friendsController.setRequest = async (req, res, next) => {
     try {
         let sender = req.userId;
         let receiver = req.body.user_id;
+        let checkBack = await FriendModel.findOne({ sender: receiver, receiver: sender });
+        if (checkBack != null) {
+            if (checkBack.status == '0' || checkBack.status == '1') {
+                return res.status(200).json({
+                    code: 200,
+                    status: 'error',
+                    message: "Đối phương đã gửi lời mời kết bạn hoặc đã là bạn",
+                });
+            }
+            checkBack.status = '0';
+
+        }
 
         let isFriend = await FriendModel.findOne({ sender: sender, receiver: receiver });
         if(isFriend != null){
+            if (isFriend.status == '1') {
+                return res.status(200).json({
+                    code: 200,
+                    status: 'error',
+                    message: "Đã gửi lời mời kết bạn trước đó",
+                });
+            }
+
+            isFriend.status = '0';
+            isFriend.save();
             res.status(200).json({
                 code: 200,
-                message: "Đã gửi lời mởi kết bạn trước đó!",
+                message: "Gửi lời mời kết bạn thành công",
             });
 
         }else{
@@ -25,7 +52,7 @@ friendsController.setRequest = async (req, res, next) => {
             makeFriend.save();
             res.status(200).json({
                 code: 200,
-                message: "Kết bạn thành công",
+                message: "Gửi lời mời kết bạn thành công",
                 data: makeFriend
             });
         }
@@ -62,13 +89,64 @@ friendsController.setAccept = async (req, res, next) => {
         let sender = req.body.user_id;
 
         let friend = await FriendModel.findOne({ sender: sender, receiver: receiver });
+
+        if (req.body.is_accept != '1' && req.body.is_accept != '2') {
+            res.status(200).json({
+                code: 200,
+                message: "Không đúng yêu cầu",
+                data: friend
+            });
+        }
+        if (friend.status == '1' && req.body.is_accept == '2') {
+            res.status(200).json({
+                code: 200,
+                message: "Không đúng yêu cầu",
+                data: friend
+            });
+        }
+
         friend.status = req.body.is_accept;
         friend.save();
+        let mes;
+        if (req.body.is_accept === '1') {
+            mes = "Kết bạn thành công";
+        } else {
+            mes = "Từ chối thành công";
+        }
 
         res.status(200).json({
             code: 200,
-            message: "Kết bạn thành công",
+            message: mes,
             data: friend
+        });
+    } catch (e) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            message: e.message
+        });
+    }
+}
+
+friendsController.setRemoveFriend = async (req, res, next) => {
+    try {
+        let receiver = req.userId;
+        let sender = req.body.user_id;
+
+        let friendRc1 = await FriendModel.findOne({ sender: sender, receiver: receiver });
+        let friendRc2 = await FriendModel.findOne({ sender: receiver, receiver: sender });
+        let final;
+        if (friendRc1 == null) {
+            final = friendRc2;
+        } else {
+            final = friendRc1;
+        }
+
+        final.status = '3';
+        final.save();
+
+        res.status(200).json({
+            code: 200,
+            message: "Xóa bạn thành công",
+            data: final
         });
     } catch (e) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
