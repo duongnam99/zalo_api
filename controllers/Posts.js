@@ -252,9 +252,9 @@ postsController.list = async (req, res, next) => {
             let listIdFriends = [];
             for (let i = 0; i < friends.length; i++) {
                 if (friends[i].sender === userId) {
-                    listIdFriends.push(friends[i].sender);
-                } else {
                     listIdFriends.push(friends[i].receiver);
+                } else {
+                    listIdFriends.push(friends[i].sender);
                 }
             }
             listIdFriends.push(userId);

@@ -7,7 +7,7 @@ postCommentController.create = async (req, res, next) => {
         let userId = req.userId;
         let post;
         try {
-            post = await (await PostModel.findById(req.params.postId));
+            post = await PostModel.findById(req.params.postId);
             if (post == null) {
                 return res.status(httpStatus.NOT_FOUND).json({message: "Can not find post"});
             }
@@ -27,14 +27,17 @@ postCommentController.create = async (req, res, next) => {
 
         let postCommentSaved = await postComment.save();
         // update countComments post
-        await PostModel.findOneAndUpdate(req.params.postId, {
+        console.log(req.params.postId)
+        console.log(post.countComments ? post.countComments + 1 : 1)
+        let postSaved = await PostModel.findByIdAndUpdate(req.params.postId, {
             countComments: post.countComments ? post.countComments + 1 : 1
         })
         postCommentSaved = await PostCommentModel.findById(postCommentSaved._id).populate('user', [
             'username', 'phonenumber'
         ]);
         return res.status(httpStatus.OK).json({
-            data: postCommentSaved
+            data: postCommentSaved,
+            post: postSaved
         });
     } catch (e) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
