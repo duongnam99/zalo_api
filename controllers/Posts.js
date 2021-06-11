@@ -250,14 +250,16 @@ postsController.list = async (req, res, next) => {
                 }
             ])
             let listIdFriends = [];
+            console.log(friends)
             for (let i = 0; i < friends.length; i++) {
-                if (friends[i].sender === userId) {
+                if (friends[i].sender.toString() === userId.toString()) {
                     listIdFriends.push(friends[i].receiver);
                 } else {
                     listIdFriends.push(friends[i].sender);
                 }
             }
             listIdFriends.push(userId);
+            console.log(listIdFriends);
             // get post of friends of 1 user
             posts = await PostModel.find({
                 "author": listIdFriends
