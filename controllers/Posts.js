@@ -107,24 +107,26 @@ postsController.edit = async (req, res, next) => {
         if (Array.isArray(images)) {
             for (const image of images) {
                 // check is old file
-                let imageFile = !image.includes('data:') ? await DocumentModel.findById(image) : null;
-                if (imageFile == null) {
-                    if (uploadFile.matchesFileBase64(image) !== false) {
-                        const imageResult = uploadFile.uploadFile(image);
-                        if (imageResult !== false) {
-                            let imageDocument = new DocumentModel({
-                                fileName: imageResult.fileName,
-                                fileSize: imageResult.fileSize,
-                                type: imageResult.type
-                            });
-                            let savedImageDocument = await imageDocument.save();
-                            if (savedImageDocument !== null) {
-                                dataImages.push(savedImageDocument._id);
+                if (image) {
+                    let imageFile = !image.includes('data:') ? await DocumentModel.findById(image) : null;
+                    if (imageFile == null) {
+                        if (uploadFile.matchesFileBase64(image) !== false) {
+                            const imageResult = uploadFile.uploadFile(image);
+                            if (imageResult !== false) {
+                                let imageDocument = new DocumentModel({
+                                    fileName: imageResult.fileName,
+                                    fileSize: imageResult.fileSize,
+                                    type: imageResult.type
+                                });
+                                let savedImageDocument = await imageDocument.save();
+                                if (savedImageDocument !== null) {
+                                    dataImages.push(savedImageDocument._id);
+                                }
                             }
                         }
+                    } else {
+                        dataImages.push(image);
                     }
-                } else {
-                    dataImages.push(image);
                 }
             }
         }
@@ -133,19 +135,21 @@ postsController.edit = async (req, res, next) => {
         if (Array.isArray(videos)) {
             for (const video of videos) {
                 // check is old file
-                let videoFile = !video.includes('data:') ? await DocumentModel.findById(video) : null;
-                if (videoFile == null) {
-                    if (uploadFile.matchesFileBase64(video) !== false) {
-                        const videoResult = uploadFile.uploadFile(video);
-                        if (videoResult !== false) {
-                            let videoDocument = new DocumentModel({
-                                fileName: videoResult.fileName,
-                                fileSize: videoResult.fileSize,
-                                type: videoResult.type
-                            });
-                            let savedVideoDocument = await videoDocument.save();
-                            if (savedVideoDocument !== null) {
-                                dataVideos.push(savedVideoDocument._id);
+                if (video) {
+                    let videoFile = !video.includes('data:') ? await DocumentModel.findById(video) : null;
+                    if (videoFile == null) {
+                        if (uploadFile.matchesFileBase64(video) !== false) {
+                            const videoResult = uploadFile.uploadFile(video);
+                            if (videoResult !== false) {
+                                let videoDocument = new DocumentModel({
+                                    fileName: videoResult.fileName,
+                                    fileSize: videoResult.fileSize,
+                                    type: videoResult.type
+                                });
+                                let savedVideoDocument = await videoDocument.save();
+                                if (savedVideoDocument !== null) {
+                                    dataVideos.push(savedVideoDocument._id);
+                                }
                             }
                         }
                     }
@@ -253,6 +257,7 @@ postsController.list = async (req, res, next) => {
                     listIdFriends.push(friends[i].receiver);
                 }
             }
+            listIdFriends.push(userId);
             // get post of friends of 1 user
             posts = await PostModel.find({
                 "author": listIdFriends
