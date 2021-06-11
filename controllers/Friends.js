@@ -22,6 +22,7 @@ friendsController.setRequest = async (req, res, next) => {
                 return res.status(200).json({
                     code: 200,
                     status: 'error',
+                    success: false,
                     message: "Đối phương đã gửi lời mời kết bạn hoặc đã là bạn",
                 });
             }
@@ -34,7 +35,7 @@ friendsController.setRequest = async (req, res, next) => {
             if (isFriend.status == '1') {
                 return res.status(200).json({
                     code: 200,
-                    status: 'error',
+                    success: false,
                     message: "Đã gửi lời mời kết bạn trước đó",
                 });
             }
@@ -94,14 +95,17 @@ friendsController.setAccept = async (req, res, next) => {
             res.status(200).json({
                 code: 200,
                 message: "Không đúng yêu cầu",
-                data: friend
+                data: friend,
+                success: false
             });
         }
         if (friend.status == '1' && req.body.is_accept == '2') {
             res.status(200).json({
                 code: 200,
                 message: "Không đúng yêu cầu",
-                data: friend
+                data: friend,
+                success: false
+
             });
         }
 
@@ -117,7 +121,9 @@ friendsController.setAccept = async (req, res, next) => {
         res.status(200).json({
             code: 200,
             message: mes,
-            data: friend
+            data: friend,
+            success: true,
+
         });
     } catch (e) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -139,12 +145,20 @@ friendsController.setRemoveFriend = async (req, res, next) => {
         } else {
             final = friendRc1;
         }
+        if (final.status != '1') {
+            res.status(200).json({
+                code: 200,
+                success: false,
+                message: "Khong thể thao tác",
+            });
+        }
 
         final.status = '3';
         final.save();
 
         res.status(200).json({
             code: 200,
+            success: true,
             message: "Xóa bạn thành công",
             data: final
         });

@@ -35,7 +35,7 @@ usersController.register = async (req, res, next) => {
             username: username,
             avatar: "60c39f54f0b2c4268eb53367",
             cover_image: "60c39eb8f0b2c4268eb53366"
-        })
+        });
 
         try {
             const savedUser = await user.save();
