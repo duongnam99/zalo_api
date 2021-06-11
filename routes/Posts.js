@@ -23,9 +23,16 @@ postsRoutes.get(
 );
 
 postsRoutes.get(
+    "/delete/:id",
+    auth,
+    asyncWrapper(postsController.delete),
+);
+
+postsRoutes.get(
     "/list",
     auth,
     asyncWrapper(postsController.list),
 );
+
 
 module.exports = postsRoutes;

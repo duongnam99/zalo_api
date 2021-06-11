@@ -201,6 +201,20 @@ postsController.show = async (req, res, next) => {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
     }
 }
+postsController.delete = async (req, res, next) => {
+    try {
+        let post = await PostModel.findByIdAndDelete(req.params.id);
+        if (post == null) {
+            return res.status(httpStatus.NOT_FOUND).json({message: "Can not find post"});
+        }
+        return res.status(httpStatus.OK).json({
+            message: 'Delete post done',
+        });
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({message: error.message});
+    }
+}
+
 postsController.list = async (req, res, next) => {
     try {
         let posts = [];
